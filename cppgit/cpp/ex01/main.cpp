@@ -29,69 +29,78 @@ bool getValidatedInput(const std::string& prompt, std::string& field, const std:
 
 
 
+void handleAdd(PhoneBook& phonebook) {
+    std::string first, last, nick, phone, secret;
+
+    if (!getValidatedInput("First Name: ", first, "First Name")) return;
+    if (!getValidatedInput("Last Name: ", last, "Last Name")) return;
+    if (!getValidatedInput("Nickname: ", nick, "Nickname")) return;
+
+    while (true) {
+    if (!getValidatedInput("Phone Number: ", phone, "Phone Number")) return;
+
+    bool is_valid = true;
+    for (size_t i = 0; i < phone.length(); ++i) {
+        if (!isdigit(phone[i])) {
+            is_valid = false;
+            break;
+        }
+    }
+
+    if (!is_valid) {
+        std::cout << "Error: Phone number must contain digits only.\n";
+    } else {
+        break;
+    }
+}
+
+    if (!getValidatedInput("Darkest Secret: ", secret, "Darkest Secret")) return;
+
+    Contact new_contact;
+    new_contact.setContactInfo(first, last, nick, phone, secret);
+    phonebook.addContact(new_contact);
+}
+
+void handleSearch(const PhoneBook& phonebook) {
+    if (phonebook.getTotalContacts() == 0) {
+        std::cout << "No contacts stored.\n";
+        return;
+    }
+
+    phonebook.displayContacts();
+    std::cout << "Enter the index of the contact: ";
+    std::string input;
+    std::getline(std::cin, input);
+
+    if (input.length() != 1 || !isdigit(input[0])) {
+        std::cout << "Error: invalid index.\n";
+        return;
+    }
+
+    int index = input[0] - '0';
+    phonebook.displayContactDetails(index);
+}
+
 int main() {
     PhoneBook phonebook;
     std::string command;
 
     while (true) {
         std::cout << "Enter a command (ADD, SEARCH, EXIT): ";
-        std::getline(std::cin, command);
+        if (!std::getline(std::cin, command)) {
+            std::cout << "\nEOF detectado. Saliendo del programa.\n";
+            break;
+        }
+
+        if (command.empty())
+            continue;
 
         if (command == "EXIT") {
             break;
-        }
-        else if (command == "ADD")
-        {
-            std::string first, last, nick, phone, secret;
-        
-            if (!getValidatedInput("First Name: ", first, "First Name")) return 0;
-            if (!getValidatedInput("Last Name: ", last, "Last Name")) return 0;
-            if (!getValidatedInput("Nickname: ", nick, "Nickname")) return 0;
-        
-            while (true) {
-                if (!getValidatedInput("Phone Number: ", phone, "Phone Number")) return 0;
-        
-                bool is_valid = true;
-                for (size_t i = 0; i < phone.length(); i++) {
-                    if (!isdigit(phone[i])) {
-                        is_valid = false;
-                        break;
-                    }
-                }
-        
-                if (!is_valid) {
-                    std::cout << "Error: Phone number must contain digits only.\n";
-                } else {
-                    break;
-                }
-            }
-        
-            if (!getValidatedInput("Darkest Secret: ", secret, "Darkest Secret")) return 0;
-        
-            Contact new_contact;
-            new_contact.setContactInfo(first, last, nick, phone, secret);
-            phonebook.addContact(new_contact);
-        }
-        
-        
-         else if (command == "SEARCH") {
-            if (phonebook.getTotalContacts() == 0) {
-                std::cout << "No contacts stored.\n";
-                continue;
-            }
-
-            phonebook.displayContacts();
-            std::cout << "Enter the index of the contact: ";
-            std::string input;
-            std::getline(std::cin, input);
-
-            if (input.length() != 1 || !isdigit(input[0])) {
-                std::cout << "Error: invalid index.\n";
-                continue;
-            }
-
-            int index = input[0] - '0';
-            phonebook.displayContactDetails(index);
+        } else if (command == "ADD") {
+            handleAdd(phonebook);
+        } else if (command == "SEARCH") {
+            handleSearch(phonebook);
         } else {
             std::cout << "Unrecognized command.\n";
         }
